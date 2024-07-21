@@ -1,0 +1,176 @@
+import random
+import numpy as np
+class Chromosome_10:
+    def __init__(self):
+        self.source_node=[]
+        self.data = {}
+        self.AUV=[]
+        self.neighbor_matrix = {}
+        self.relay_node = {}
+        self.load_factor = []
+        self.code =[]
+        self.code_length=0
+        self.fitness = 0
+        self.fitness1 = 0
+        self.energy = {}
+        self.packet_allo={}
+        self.rand_init()
+        self.decoding([])
+
+    # initial energy
+    def getEnergy(self,AUV):
+        energy = [70,90, 80,75,82]
+        self.energy = {node: energy[idx] for idx, node in enumerate(self.AUV)}
+        return self.energy
+
+    #bandwidth
+    def getB(self,AUV):
+        B = [80,65, 55,73,80]
+        self.B = {node: B[idx] for idx, node in enumerate(self.AUV)}
+        return self.B
+
+    #Simulate sending data
+    def allocate_data(self, energy_factors, packet_sum):
+        value_list = list(packet_sum.values())
+        # Use the np.tile function for repeated stacking.
+        result_matrix = np.tile([value_list], (len(energy_factors), 1))
+        allocated_data=result_matrix*energy_factors
+        return allocated_data
+
+    # Initialize a set of codes
+    def rand_init(self):
+        self.source_node=[1,2,3,4,5,6,7,8,9,10]
+        self.AUV=[11,12,13,14,15]
+        self.code_length=len(self.source_node)
+        self.energy = self.getEnergy(self.AUV)
+        self.B = self.getB(self.AUV)
+        for node in self.source_node:
+           if node == 1:
+                self.packet =53
+           elif node == 2:
+                self.packet = 76
+           elif node == 3:
+               self.packet = 85
+           elif node == 4:
+                self.packet = 75
+           elif node == 5:
+               self.packet = 63
+           elif node == 6:
+                self.packet = 55
+           elif node == 7:
+               self.packet = 65
+           elif node == 8:
+                self.packet = 72
+           elif node == 9:
+               self.packet = 84
+           elif node == 10:
+               self.packet = 64
+           self.data[node] = self.packet
+
+        # Define neighbouring nodes according to the network topology
+        for node in self.source_node:
+            self.neighb_node = []
+            if node == 1:
+                self.neighb_node = [11, 12]
+            elif node == 2:
+                self.neighb_node = [11, 12]
+            elif node == 3:
+                self.neighb_node= [11, 12]
+            elif node == 4:
+                self.neighb_node =[11, 12,13]
+            elif node == 5:
+                self.neighb_node = [12,13,14]
+            elif node == 6:
+                self.neighb_node = [12,13,14]
+            elif node == 7:
+                self.neighb_node = [13,14,15]
+            elif node == 8:
+                self.neighb_node = [13,14,15]
+            elif node == 9:
+                self.neighb_node = [14,15]
+            elif node == 10:
+                self.neighb_node = [14,15]
+            self.neighbor_matrix[node] = self.neighb_node
+
+        #Random selection of relay nodes
+        for source_node,neighb_node in self.neighbor_matrix.items():
+             num_relays = random.randint(1, len(neighb_node))
+             self.relay_node[source_node] =  random.sample(neighb_node, num_relays)
+
+        # matrix of relay nodes
+        max_relay_count = 0
+        for relay_nodes in self.relay_node.values():
+            relay_count = len(relay_nodes)
+            if relay_count > max_relay_count:
+                max_relay_count = relay_count
+        self.relay_matrix = np.zeros((len(self.AUV), len(self.source_node)), dtype=int)
+        m = 0
+        for key, value in self.relay_node.items():
+            for n in range(len(self.AUV)):
+                diff_num = len(self.AUV) - len(value)
+                if diff_num == 0:
+                    self.relay_matrix[n,m] = value[n]
+                else:
+                    if n < len(value):
+                        self.relay_matrix[n,m] = value[n]
+                    else:
+                        self.relay_matrix[n,m] = 0
+            m += 1
+
+        # Generate energy matrix of relay nodes
+        self.arr_energy = np.copy(self.relay_matrix)
+        self.arr_B = np.copy(self.relay_matrix)
+        for i in range(len(self.arr_energy)):
+            for j in range(len(self.arr_energy[i])):
+                for key, value in self.energy.items():
+                    if self.arr_energy[i, j] == key:
+                        self.arr_energy[i, j] = value
+        for i in range(len(self.arr_B)):
+            for j in range(len(self.arr_B[i])):
+                for key, value in self.B.items():
+                    if self.arr_B[i, j] == key:
+                        self.arr_B[i, j] = value
+        a=0.4
+        self.r=a*(self.arr_energy/100)+(1-a)*(self.arr_B/100)
+        self.load_factor=self.r/np.sum(self.r, axis=0)
+        self.packet_allo=self.allocate_data(self.load_factor,self.data)
+        self.code=self.relay_matrix+self.packet_allo/100
+        return self.code
+
+    #decoding
+    def decoding(self,code):
+        decimal_part = list(map(lambda x: x % 1, code))
+        matrix = np.array(decimal_part)
+        load=((matrix*100)**2)/1200
+        return load
+
+    #original fitness function
+    def origin_fitness(self):
+        f = self.decoding(self.code)
+        non_zero_elements = [element for sublist in f for element in sublist if element != 0]
+        self.fitness =np.var(non_zero_elements)
+        return (np.var(non_zero_elements)) #load variance
+
+    #Original fitness function after composite sigmoid function
+    def get_fitness1(self):
+        if self.origin_fitness() is not None:
+          origin_fit = self.origin_fitness()
+          if origin_fit is not None:
+                self.fitness= (1 + np.exp(self.origin_fitness())) ** (-1)
+        return self.fitness
+
+    # Find the absolute value of the maximum value of each individual fitness-contemporary individual fitness
+    # g>=0.3*n
+    def get_fitness2(self): 
+        self.avg_fitness = np.mean(self.origin_fitness())
+        b = [np.abs(i - np.max(self.origin_fitness())) for i in self.origin_fitness()]
+        c = np.max(b)
+        self.fitness2=(1 + np.exp((self.origin_fitness() - self.avg_fitness) / c)) ** (-1)
+        return self.fitness2
+
+    # g<0.3*n
+    def get_fitness3(self):
+        self.fitness2=(1 + np.exp(self.origin_fitness() - self.avg_fitness)) ** (-1)
+        return self.fitness2
+
+
