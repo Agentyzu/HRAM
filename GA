@@ -43,7 +43,7 @@ class GeneticAlgorithm:
         plt.plot(x, fitness)
         plt.ylabel('network load variance')
         plt.xlabel('Number of iterations (times)')
-        #filename = f"C:/Users/Leona/Desktop/图/AUV_5/result_{int(time.time())}.svg"
+        filename = f"C:/Users/Leona/Desktop/图/AUV_5/result_{int(time.time())}.svg"
         #plt.savefig(filename, format='svg')
         plt.show()
 
