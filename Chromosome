@@ -130,7 +130,7 @@ class Chromosome_10:
                 for key, value in self.B.items():
                     if self.arr_B[i, j] == key:
                         self.arr_B[i, j] = value
-        a=0.4
+        a=0.4  # The optimal value was observed by adjusting the parameters and determined to be 0.4 when the optimal
         self.r=a*(self.arr_energy/100)+(1-a)*(self.arr_B/100)
         self.load_factor=self.r/np.sum(self.r, axis=0)
         self.packet_allo=self.allocate_data(self.load_factor,self.data)
