@@ -11,3 +11,7 @@ When installing Python, which can be directly downloaded from the official Pytho
 `PyCharm` is a comprehensive integrated development environment (IDE) tailored for Python programming. It offers robust features for code completion, debugging, testing, and version control.
 # Additional Supplements
 Only the main code is provided, the experiment is carried out by changing the parameters and observing the optimal results, the process of changing the parameters needs to be adjusted manually. By altering the parameter (denoted as $a$ in the `chromosome` file), we observe the variation of link load variance with different quantities of AUVs in the receiving layer. The result is shown in the firure. It is observed that at $\eta=0.4$, the load variance is minimized across various quantities of AUVs.
+
+![figure](./Figure 1.pdf)
+
+Due to the randomness of this experiment, experimental results in the paper are based on 500 rounds of randomly generated simulation scenarios, and the average of the experimental results is taken.
