@@ -9,3 +9,5 @@ In the route allocation optimisation module of paper, the HRAM-HRAOA applies an 
 When installing Python, which can be directly downloaded from the official Python website, it is advisable to add Python to the environment variables during the installation process to avoid separate configurations later.
 
 `PyCharm` is a comprehensive integrated development environment (IDE) tailored for Python programming. It offers robust features for code completion, debugging, testing, and version control.
+# Additional Supplements
+Only the main code is provided, the experiment is carried out by changing the parameters and observing the optimal results, the process of changing the parameters needs to be adjusted manually. By altering the parameter, we observe the variation of link load variance with different quantities of AUVs in the receiving layer. The result is shown in the firure. It is observed that at $\eta=0.4$, the load variance is minimized across various quantities of AUVs.
